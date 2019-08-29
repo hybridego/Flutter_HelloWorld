@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:english_words/english_words.dart';
 import 'dart:io';
 import 'dart:developer' as developer;
-import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:flutter_blue/flutter_blue.dart';
+//import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
 void main() => runApp(MyApp());
 
@@ -144,7 +145,10 @@ class _ScanPageState extends State<ScanPage> {
             ),
             ListTile(
               title: Text('Item 2'),
-              onTap: () {},
+              onTap: () {
+                Navigator.pop(context);
+                _pushSaved();
+              },
             ),
           ],
         ),
