@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:english_words/english_words.dart';
 import 'dart:io';
+import 'dart:math';
 import 'dart:developer' as developer;
 import 'package:flutter_blue/flutter_blue.dart';
 //import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
@@ -53,6 +56,8 @@ class ScanPage extends StatefulWidget {
 
 class _ScanPageState extends State<ScanPage> {
   int _counter = 0;
+  Random rnd = new Random();
+  FlutterBlue flutterBlue = FlutterBlue.instance;
 
   final List<WordPair> _suggestions = <WordPair>[];
   final Set<WordPair> _saved = Set<WordPair>();
@@ -77,7 +82,7 @@ class _ScanPageState extends State<ScanPage> {
     final bool alreadySaved = _saved.contains(pair);
     return ListTile(
       title: Text(
-        pair.asPascalCase,
+        pair.asPascalCase + " " + (rnd.nextInt(45)+1).toString(),
         style: _biggerFont,
       ),
       trailing: Icon(
@@ -99,6 +104,23 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   void _incrementCounter() {
+    StreamSubscription _scanSubscription;
+    StreamSubscription _stateSubscription;
+    Map<DeviceIdentifier, ScanResult> scanResults = new Map();
+    bool isScanning = false;
+    BluetoothState state = BluetoothState.unknown;
+    BluetoothDevice device;
+    bool get isConnected => (device != null);
+    StreamSubscription deviceConnection;
+    StreamSubscription deviceStateSubscription;
+    List<BluetoothService> services = new List();
+    
+    _scanSubscription = flutterBlue.scan().listen((scanResult) {
+    // do something with scan result
+    device = scanResult.device;
+    print('${device.name} found! rssi: ${scanResult.rssi}');
+});
+
     setState(() {
       // This call to setState tells the Flutter framework that something has
       // changed in this State, which causes it to rerun the build method below
@@ -207,7 +229,7 @@ class _ScanPageState extends State<ScanPage> {
             (WordPair pair) {
               return ListTile(
                 title: Text(
-                  pair.asPascalCase,
+                  pair.asPascalCase + " " +(rnd.nextInt(45)+1).toString(),
                   style: _biggerFont,
                 ),
               );
