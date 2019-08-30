@@ -1,11 +1,11 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:english_words/english_words.dart';
 import 'dart:io';
 import 'dart:math';
 import 'dart:developer' as developer;
 import 'package:flutter_blue/flutter_blue.dart';
+
 //import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
 void main() => runApp(MyApp());
@@ -57,11 +57,48 @@ class ScanPage extends StatefulWidget {
 class _ScanPageState extends State<ScanPage> {
   int _counter = 0;
   Random rnd = new Random();
-  FlutterBlue flutterBlue = FlutterBlue.instance;
+
+  FlutterBlue _flutterBlue = FlutterBlue.instance;
+  StreamSubscription _scanSubscription;
+  StreamSubscription _stateSubscription;
+  Map<DeviceIdentifier, ScanResult> scanResults = new Map();
+  bool isScanning = false;
+  BluetoothState state = BluetoothState.unknown;
+  BluetoothDevice device;
+  bool get isConnected => (device != null);
+  StreamSubscription deviceConnection;
+  StreamSubscription deviceStateSubscription;
+  List<BluetoothService> services = new List();
+  Map<Guid, StreamSubscription> valueChangedSubscription = {};
+  BluetoothDeviceState deviceState = BluetoothDeviceState.disconnected;
+
+  // _scanSubscription = flutterBlue.scan().listen((scanResult) {
+  //   // do something with scan result
+  //   device = scanResult.device;
+  //   print('${device.name} found! rssi: ${scanResult.rssi}');
+  // });
 
   final List<WordPair> _suggestions = <WordPair>[];
   final Set<WordPair> _saved = Set<WordPair>();
   final TextStyle _biggerFont = TextStyle(fontSize: 18.0);
+
+  @override
+  void initState() {
+    super.initState();
+    _flutterBlue.state.then((s) {
+      setState(() {
+        state = s;
+      });
+    });
+
+    _stateSubscription = _flutterBlue.onStateChanged().listen((s) {
+      setState(() {
+        state = s;
+      });
+    });
+  }
+
+  //https://www.youtube.com/watch?v=sJv1IPLfYdY&vl=ko 12:49
 
   Widget _buildSuggestions() {
     return ListView.builder(
@@ -82,7 +119,7 @@ class _ScanPageState extends State<ScanPage> {
     final bool alreadySaved = _saved.contains(pair);
     return ListTile(
       title: Text(
-        pair.asPascalCase + " " + (rnd.nextInt(45)+1).toString(),
+        pair.asPascalCase + " " + (rnd.nextInt(45) + 1).toString(),
         style: _biggerFont,
       ),
       trailing: Icon(
@@ -104,23 +141,6 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   void _incrementCounter() {
-    StreamSubscription _scanSubscription;
-    StreamSubscription _stateSubscription;
-    Map<DeviceIdentifier, ScanResult> scanResults = new Map();
-    bool isScanning = false;
-    BluetoothState state = BluetoothState.unknown;
-    BluetoothDevice device;
-    bool get isConnected => (device != null);
-    StreamSubscription deviceConnection;
-    StreamSubscription deviceStateSubscription;
-    List<BluetoothService> services = new List();
-    
-    _scanSubscription = flutterBlue.scan().listen((scanResult) {
-    // do something with scan result
-    device = scanResult.device;
-    print('${device.name} found! rssi: ${scanResult.rssi}');
-});
-
     setState(() {
       // This call to setState tells the Flutter framework that something has
       // changed in this State, which causes it to rerun the build method below
@@ -129,6 +149,35 @@ class _ScanPageState extends State<ScanPage> {
       // called again, and so nothing would appear to happen.
       _counter++;
     });
+  }
+
+  void _pushSaved() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) {
+          final Iterable<ListTile> tiles = _saved.map(
+            (WordPair pair) {
+              return ListTile(
+                title: Text(
+                  pair.asPascalCase + " " + (rnd.nextInt(45) + 1).toString(),
+                  style: _biggerFont,
+                ),
+              );
+            },
+          );
+          final List<Widget> divided = ListTile.divideTiles(
+            context: context,
+            tiles: tiles,
+          ).toList();
+          return Scaffold(
+            appBar: AppBar(
+              title: Text('Saved Suggestions'),
+            ),
+            body: ListView(children: divided),
+          );
+        },
+      ),
+    );
   }
 
   @override
@@ -153,12 +202,19 @@ class _ScanPageState extends State<ScanPage> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
-            DrawerHeader(
-              child: Text("Drawer Header"),
-              decoration: BoxDecoration(
-                color: Colors.red,
+            new UserAccountsDrawerHeader(
+              accountName: new Text('Lionel.j'),
+              accountEmail: new Text('lionel.j@kakaocorp.com'),
+              currentAccountPicture: new CircleAvatar(
+                backgroundImage: new NetworkImage('http://i.pravatar.cc/300'),
               ),
             ),
+            // DrawerHeader(
+            //   child: Text("Drawer Header"),
+            //   decoration: BoxDecoration(
+            //     color: Colors.red,
+            //   ),
+            // ),
             ListTile(
               title: Text('Item 1'),
               onTap: () {
@@ -218,35 +274,6 @@ class _ScanPageState extends State<ScanPage> {
         tooltip: 'Increment',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
-  }
-
-  void _pushSaved() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (BuildContext context) {
-          final Iterable<ListTile> tiles = _saved.map(
-            (WordPair pair) {
-              return ListTile(
-                title: Text(
-                  pair.asPascalCase + " " +(rnd.nextInt(45)+1).toString(),
-                  style: _biggerFont,
-                ),
-              );
-            },
-          );
-          final List<Widget> divided = ListTile.divideTiles(
-            context: context,
-            tiles: tiles,
-          ).toList();
-          return Scaffold(
-            appBar: AppBar(
-              title: Text('Saved Suggestions'),
-            ),
-            body: ListView(children: divided),
-          );
-        },
-      ),
     );
   }
 }

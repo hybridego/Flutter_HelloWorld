@@ -25,7 +25,7 @@ dependencies:
   cupertino_icons: ^0.1.2
 
   english_words: ^3.1.0
-
+  protobuf: "^0.13.12" # for flutter_blue
   flutter_blue: ^0.6.0+4  # https://pub.dev/packages/flutter_blue # https://www.youtube.com/watch?v=sJv1IPLfYdY&vl=ko
 
   # flutter_bluetooth_serial: ^0.2.2 # https://pub.dev/packages/flutter_bluetooth_serial
