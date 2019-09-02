@@ -58,12 +58,18 @@ class _ScanPageState extends State<ScanPage> {
   int _counter = 0;
   Random rnd = new Random();
 
-  FlutterBlue _flutterBlue = FlutterBlue.instance;
+  /// Scanning
   StreamSubscription _scanSubscription;
-  StreamSubscription _stateSubscription;
   Map<DeviceIdentifier, ScanResult> scanResults = new Map();
   bool isScanning = false;
+
+  /// State
+  StreamSubscription _stateSubscription;
   BluetoothState state = BluetoothState.unknown;
+
+  FlutterBlue _flutterBlue = FlutterBlue.instance;
+
+  /// Device
   BluetoothDevice device;
   bool get isConnected => (device != null);
   StreamSubscription deviceConnection;
@@ -98,7 +104,72 @@ class _ScanPageState extends State<ScanPage> {
     });
   }
 
-  //https://www.youtube.com/watch?v=sJv1IPLfYdY&vl=ko 12:49
+  @override
+  void dispose() {
+    _stateSubscription?.cancel();
+    _stateSubscription = null;
+
+    _scanSubscription?.cancel();
+    _scanSubscription = null;
+
+    deviceConnection?.cancel();
+    deviceConnection = null;
+
+    super.dispose();
+  }
+
+  _startScan() {
+    _scanSubscription = _flutterBlue
+        .scan(
+      timeout: const Duration(seconds: 5),
+    )
+        .listen((scanResults) {
+      print('localName : ${scanResults.advertisementData.localName}');
+      print(
+          'manufactureData : ${scanResults.advertisementData.manufacturerData}');
+      print('service : ${scanResults.advertisementData.serviceData}');
+
+      setState(() {
+        print('${scanResult.device.name} found! rssi: ${scanResult.rssi}');
+        scanResults[scanResults.device.id] = scanResult;
+      });
+    }, onDone: _stopScan);
+
+    setState(() {
+      isScanning = true;
+    });
+  }
+
+  _stopScan() {
+    _scanSubscription?.cancel();
+    _scanSubscription = null;
+
+    setState(() {
+      isScanning = false;
+    });
+  }
+
+  _buildScanningButton() {
+    if (isConnected || state != BluetoothState.on) {
+      return null;
+    }
+    if (isScanning) {
+      return FloatingActionButton(
+        child: Icon(Icon.stop),
+        onPressed: _stopScan,
+        backgroundColor: Colors.red,
+      );
+    } else {
+      return FloatingActionButton(
+        child: Icon(
+          Icons.search,
+        ),
+        onPressed: _startScan,
+      );
+    }
+  }
+
+  //https://www.youtube.com/watch?v=sJv1IPLfYdY&vl=ko 38:00
 
   Widget _buildSuggestions() {
     return ListView.builder(
@@ -269,11 +340,12 @@ class _ScanPageState extends State<ScanPage> {
             */
       body: _buildSuggestions(),
 
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: _incrementCounter,
+      //   tooltip: 'Increment',
+      //   child: Icon(Icons.add),
+      // ), // This trailing comma makes auto-formatting nicer for build methods.
+      floatingActionButton: _buildScanningButton(),
     );
   }
 }
