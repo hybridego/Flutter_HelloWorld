@@ -57,17 +57,16 @@ class ScanPage extends StatefulWidget {
 class _ScanPageState extends State<ScanPage> {
   int _counter = 0;
   Random rnd = new Random();
+  FlutterBlue _flutterBlue = FlutterBlue.instance;
 
   /// Scanning
   StreamSubscription _scanSubscription;
-  Map<DeviceIdentifier, ScanResult> scanResults = new Map();
+  Map<DeviceIdentifier, ScanResult> gscanResults = new Map();
   bool isScanning = false;
 
   /// State
   StreamSubscription _stateSubscription;
   BluetoothState state = BluetoothState.unknown;
-
-  FlutterBlue _flutterBlue = FlutterBlue.instance;
 
   /// Device
   BluetoothDevice device;
@@ -91,13 +90,18 @@ class _ScanPageState extends State<ScanPage> {
   @override
   void initState() {
     super.initState();
-    _flutterBlue.state.then((s) {
-      setState(() {
-        state = s;
-      });
-    });
+    if (_flutterBlue.isOn == BluetoothState.off) {
+      developer.log('Bluetooth state is off.', name: 'dev log.');
+    } else if (_flutterBlue.isOn == true) {
+      developer.log('Bluetooth state is on.', name: 'dev log.');
+    }
 
-    _stateSubscription = _flutterBlue.onStateChanged().listen((s) {
+    _flutterBlue.state.listen((s) {
+      if (_flutterBlue.isOn == BluetoothState.off) {
+        developer.log('Bluetooth state is off. 22', name: 'dev log.');
+      } else if (_flutterBlue.isOn == true) {
+        developer.log('Bluetooth state is on. 22', name: 'dev log.');
+      }
       setState(() {
         state = s;
       });
@@ -123,15 +127,15 @@ class _ScanPageState extends State<ScanPage> {
         .scan(
       timeout: const Duration(seconds: 5),
     )
-        .listen((scanResults) {
+        .listen((ScanResult scanResults) {
       print('localName : ${scanResults.advertisementData.localName}');
       print(
           'manufactureData : ${scanResults.advertisementData.manufacturerData}');
       print('service : ${scanResults.advertisementData.serviceData}');
 
       setState(() {
-        print('${scanResult.device.name} found! rssi: ${scanResult.rssi}');
-        scanResults[scanResults.device.id] = scanResult;
+        print('${scanResults.device.name} found! rssi: ${scanResults.rssi}');
+        gscanResults[scanResults.device.id] = scanResults;
       });
     }, onDone: _stopScan);
 
