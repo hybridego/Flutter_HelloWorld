@@ -177,42 +177,48 @@ class _ScanPageState extends State<ScanPage> {
   //https://www.youtube.com/watch?v=sJv1IPLfYdY&vl=ko 38:00
 
   Widget _buildSuggestions() {
-    return ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemBuilder: /*1*/ (context, i) {
-          // stderr.writeln("i:"+ i)
-          if (i.isOdd) return Divider(); /*2*/
+    return Container(
+      color: (Colors.yellow),
+      child: ListView.builder(
+          padding: const EdgeInsets.all(16.0),
+          itemBuilder: /*1*/ (context, i) {
+            // stderr.writeln("i:"+ i)
+            if (i.isOdd) return Divider(); /*2*/
 
-          final index = i ~/ 2; /*3*/
-          if (index >= _suggestions.length) {
-            _suggestions.addAll(generateWordPairs().take(10)); /*4*/
-          }
-          return _buildRow(_suggestions[index]);
-        });
+            final index = i ~/ 2; /*3*/
+            if (index >= _suggestions.length) {
+              _suggestions.addAll(generateWordPairs().take(10)); /*4*/
+            }
+            return _buildRow(_suggestions[index]);
+          }),
+    );
   }
 
   Widget _buildRow(WordPair pair) {
     final bool alreadySaved = _saved.contains(pair);
-    return ListTile(
-      title: Text(
-        pair.asPascalCase + " " + (random.nextInt(45) + 1).toString(),
-        style: _biggerFont,
+    return Container(
+      color: (Colors.red),
+      child: ListTile(
+        title: Text(
+          pair.asPascalCase + " " + (random.nextInt(45) + 1).toString(),
+          style: _biggerFont,
+        ),
+        trailing: Icon(
+          // Add the lines from here...
+          alreadySaved ? Icons.favorite : Icons.favorite_border,
+          color: alreadySaved ? Colors.pink[200] : null,
+        ),
+        onTap: () {
+          // Add 9 lines from here...
+          setState(() {
+            if (alreadySaved) {
+              _saved.remove(pair);
+            } else {
+              _saved.add(pair);
+            }
+          });
+        },
       ),
-      trailing: Icon(
-        // Add the lines from here...
-        alreadySaved ? Icons.favorite : Icons.favorite_border,
-        color: alreadySaved ? Colors.pink[200] : null,
-      ),
-      onTap: () {
-        // Add 9 lines from here...
-        setState(() {
-          if (alreadySaved) {
-            _saved.remove(pair);
-          } else {
-            _saved.add(pair);
-          }
-        });
-      },
     );
   }
 
