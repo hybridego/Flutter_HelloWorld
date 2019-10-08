@@ -194,13 +194,21 @@ class _ScanPageState extends State<ScanPage> {
     );
   }
 
+  String get6RandNum(){
+    String ret="";
+    for(var i=6; i>0; i--){
+ret+=" "+(random.nextInt(45) + 1).toString();
+    }
+    return ret;
+  }
+
   Widget _buildRow(WordPair pair) {
     final bool alreadySaved = _saved.contains(pair);
     return Container(
       color: (Colors.red),
       child: ListTile(
         title: Text(
-          pair.asPascalCase + " " + (random.nextInt(45) + 1).toString(),
+          pair.asPascalCase + " " + get6RandNum() ,
           style: _biggerFont,
         ),
         trailing: Icon(
