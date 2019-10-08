@@ -56,7 +56,7 @@ class ScanPage extends StatefulWidget {
 
 class _ScanPageState extends State<ScanPage> {
   int _counter = 0;
-  Random rnd = new Random();
+  Random random = new Random();
   FlutterBlue _flutterBlue = FlutterBlue.instance;
 
   /// Scanning
@@ -159,7 +159,8 @@ class _ScanPageState extends State<ScanPage> {
     }
     if (isScanning) {
       return FloatingActionButton(
-        child: Icon(Icon.stop),
+        //child: Icon(Icon.stop),
+        child: Icon(Icons.stop),
         onPressed: _stopScan,
         backgroundColor: Colors.red,
       );
@@ -194,7 +195,7 @@ class _ScanPageState extends State<ScanPage> {
     final bool alreadySaved = _saved.contains(pair);
     return ListTile(
       title: Text(
-        pair.asPascalCase + " " + (rnd.nextInt(45) + 1).toString(),
+        pair.asPascalCase + " " + (random.nextInt(45) + 1).toString(),
         style: _biggerFont,
       ),
       trailing: Icon(
@@ -234,7 +235,7 @@ class _ScanPageState extends State<ScanPage> {
             (WordPair pair) {
               return ListTile(
                 title: Text(
-                  pair.asPascalCase + " " + (rnd.nextInt(45) + 1).toString(),
+                  pair.asPascalCase + " " + (random.nextInt(45) + 1).toString(),
                   style: _biggerFont,
                 ),
               );
