@@ -2,9 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:english_words/english_words.dart';
 import 'dart:io';
-import 'dart:math';
 import 'dart:developer' as developer;
 import 'package:flutter_blue/flutter_blue.dart';
+
+import 'buisness.dart';
 
 //import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
@@ -56,7 +57,7 @@ class ScanPage extends StatefulWidget {
 
 class _ScanPageState extends State<ScanPage> {
   int _counter = 0;
-  Random random = new Random();
+  
   FlutterBlue _flutterBlue = FlutterBlue.instance;
 
   /// Scanning
@@ -194,18 +195,10 @@ class _ScanPageState extends State<ScanPage> {
     );
   }
 
-  String get6RandNum(){
-    String ret="";
-    for(var i=6; i>0; i--){
-ret+=" "+(random.nextInt(45) + 1).toString();
-    }
-    return ret;
-  }
-
   Widget _buildRow(WordPair pair) {
     final bool alreadySaved = _saved.contains(pair);
     return Container(
-      color: (Colors.red),
+      color: (Colors.green),
       child: ListTile(
         title: Text(
           pair.asPascalCase + " " + get6RandNum() ,
