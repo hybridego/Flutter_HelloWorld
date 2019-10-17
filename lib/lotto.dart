@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'dart:async';
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 // http://www.nlotto.co.kr/common.do?method=getLottoNumber&drwNo=825
@@ -26,28 +26,49 @@ import 'package:http/http.dart' as http;
 const baseUrl = "http://www.nlotto.co.kr/common.do";
 
 class LottoInfo {
- DateTime lotteryDate;
- int drwtNo1;
- int drwtNo2;
- int drwtNo3;
- int drwtNo4;
- int drwtNo5;
- int drwtNo6;
- int round;
+  String lotteryDate;
+  int drwtNo1;
+  int drwtNo2;
+  int drwtNo3;
+  int drwtNo4;
+  int drwtNo5;
+  int drwtNo6;
+  int round;
 
-  LottoInfo([this.lotteryDate, this.drwtNo1, this.drwtNo2, this.drwtNo3, this.drwtNo4, this.drwtNo5, this.drwtNo6, this.round ]);
-  
-  LottoInfo.origin(){
-lotteryDate=DateTime.parse("1000-01-01");
-drwtNo1=0;
-drwtNo2=0;
-drwtNo3=0;
-drwtNo4=0;
-drwtNo5=0;
-drwtNo6=0;
-round=0;
+  LottoInfo(
+      {this.lotteryDate,
+      this.drwtNo1: 0,
+      this.drwtNo2,
+      this.drwtNo3,
+      this.drwtNo4,
+      this.drwtNo5,
+      this.drwtNo6,
+      this.round});
+
+  LottoInfo.origin() {
+    lotteryDate = "";
+    drwtNo1 = 0;
+    drwtNo2 = 0;
+    drwtNo3 = 0;
+    drwtNo4 = 0;
+    drwtNo5 = 0;
+    drwtNo6 = 0;
+    round = 0;
+  }
+  factory LottoInfo.fromJson(Map<String, dynamic> json) {
+    return LottoInfo(
+      lotteryDate: json['drwNoDate'],
+      drwtNo1: json['drwtNo1'],
+      drwtNo2: json['drwtNo2'],
+      drwtNo3: json['drwtNo3'],
+      drwtNo4: json['drwtNo4'],
+      drwtNo5: json['drwtNo5'],
+      drwtNo6: json['drwtNo6'],
+      round: json['drwNo'],
+    );
   }
 
+/*
   LottoInfo.fromJson(Map<String, dynamic> json) :
           lotteryDate = json['drwNoDate'],
           drwtNo1 = json['drwtNo1'],
@@ -59,11 +80,19 @@ round=0;
           round = json['drwNo'] {
               print('In LottoInfo.fromJson(): ($lotteryDate, $round)' );
           }
+          */
 }
 
 class LottoAPI {
-  static Future getLottoNumber(int round) {
-    var url = baseUrl + "/users";
-    return http.get(url);
+  static Future<LottoInfo> getLottoNumber(int round) async {
+    var url = baseUrl + "?method=getLottoNumber&drwNo=${round.toString()}";
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      final jsonBody = json.decode(response.body);
+      print('localName : ${jsonBody.toString()}');
+      return LottoInfo.fromJson(jsonBody);
+    } else {
+      throw Exception("Failed to load LottoInfo.");
+    }
   }
 }

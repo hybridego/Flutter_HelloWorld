@@ -5,14 +5,19 @@ import 'dart:io';
 import 'dart:developer' as developer;
 import 'package:flutter_blue/flutter_blue.dart';
 
-import 'buisness.dart';
+import 'package:hello_world/buisness.dart';
+import 'package:hello_world/lotto.dart';
 
 //import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(MyApp(lottoinfo : LottoAPI.getLottoNumber(880)));
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
+  final Future<LottoInfo> lottoinfo;
+
+  MyApp({Key key, this.lottoinfo}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     stderr.writeln('Build MyApp.');
@@ -124,6 +129,8 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   _startScan() {
+    LottoAPI.getLottoNumber(800);
+    /*
     _scanSubscription = _flutterBlue
         .scan(
       timeout: const Duration(seconds: 5),
@@ -143,6 +150,7 @@ class _ScanPageState extends State<ScanPage> {
     setState(() {
       isScanning = true;
     });
+    */
   }
 
   _stopScan() {
@@ -312,6 +320,7 @@ class _ScanPageState extends State<ScanPage> {
               },
             ),
           ],
+
         ),
       ),
 
